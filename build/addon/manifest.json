@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Manual Sort for Zotero",
+  "version": "0.1.1",
+  "description": "Drag items to set a persistent manual order inside Zotero collections",
+  "icons": {
+    "48": "content/icons/mouse-click.svg",
+    "96": "content/icons/mouse-click.svg"
+  },
+  "applications": {
+    "zotero": {
+      "id": "manual-sort@local.zotero",
+      "strict_min_version": "9.0",
+      "strict_max_version": "9.0.*",
+      "update_url": "https://github.com/local/zotero-manual-sort/releases/download/release/update.json"
+    }
+  }
+}

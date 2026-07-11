@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "name": "__addonName__",
+  "version": "__buildVersion__",
+  "description": "Drag items to set a persistent manual order inside Zotero collections",
+  "icons": {
+    "48": "content/icons/mouse-click.svg",
+    "96": "content/icons/mouse-click.svg"
+  },
+  "applications": {
+    "zotero": {
+      "id": "__addonID__",
+      "strict_min_version": "9.0",
+      "strict_max_version": "9.0.*"
+    }
+  }
+}

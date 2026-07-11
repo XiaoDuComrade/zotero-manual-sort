@@ -1,0 +1,32 @@
+{
+  "name": "zotero-manual-sort",
+  "version": "0.1.1",
+  "private": true,
+  "description": "Drag Zotero 9 collection items into a persistent manual order",
+  "author": "Local Zotero Plugin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/local/zotero-manual-sort.git"
+  },
+  "config": {
+    "addonName": "Manual Sort for Zotero",
+    "addonID": "manual-sort@local.zotero",
+    "addonRef": "manualsort",
+    "addonInstance": "ManualSort"
+  },
+  "scripts": {
+    "build": "zotero-plugin build",
+    "test": "vitest run",
+    "verify:xpi": "powershell -ExecutionPolicy Bypass -File scripts/verify-xpi.ps1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "happy-dom": "^18.0.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "zotero-plugin-scaffold": "^0.6.0",
+    "zotero-types": "^3.1.9"
+  }
+}
