@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "__addonName__",
   "version": "__buildVersion__",
-  "description": "Drag items to set a persistent manual order inside Zotero collections",
+  "description": "Manually order Zotero collections and the items inside them",
   "icons": {
     "48": "content/icons/mouse-click.svg",
     "96": "content/icons/mouse-click.svg"

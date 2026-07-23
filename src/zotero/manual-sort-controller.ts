@@ -1,5 +1,6 @@
 import { reorderByDrop, orderTreeRowGroups, topLevelItemIDs, type DropPlacement } from "../core/reorder";
 import { CollectionOrderStore } from "./collection-order-store";
+import { CollectionTreeSorter } from "./collection-tree-sorter";
 
 interface DragState {
   collectionID: number;
@@ -38,15 +39,19 @@ export class ManualSortController {
   private readonly patches = new Map<any, TreePatch>();
   private readonly pendingTimers = new Map<any, number>();
   private readonly store: CollectionOrderStore;
+  private readonly collectionTreeSorter: CollectionTreeSorter;
 
   constructor(private readonly ports: any = {}) {
     const db = ports.db ?? this.zotero?.DB;
     this.store = ports.store ?? new CollectionOrderStore(db);
+    this.collectionTreeSorter =
+      ports.collectionTreeSorter ?? new CollectionTreeSorter(ports);
   }
 
   start(): void {
     if (this.started) return;
     this.started = true;
+    this.collectionTreeSorter.start();
     for (const win of this.zotero?.getMainWindows?.() ?? []) {
       this.registerWindow(win);
     }
@@ -54,18 +59,21 @@ export class ManualSortController {
 
   stop(): void {
     this.started = false;
+    this.collectionTreeSorter.stop();
     for (const win of [...this.patches.keys(), ...this.pendingTimers.keys()]) {
       this.unregisterWindow(win);
     }
   }
 
   registerWindow(win: any): void {
+    this.collectionTreeSorter.registerWindow(win);
     if (!win?.document || this.patches.has(win) || this.pendingTimers.has(win)) return;
     if (this.tryInstall(win)) return;
     this.scheduleInstall(win, 0);
   }
 
   unregisterWindow(win: any): void {
+    this.collectionTreeSorter.unregisterWindow(win);
     const timer = this.pendingTimers.get(win);
     if (timer !== undefined) {
       win?.clearTimeout?.(timer);

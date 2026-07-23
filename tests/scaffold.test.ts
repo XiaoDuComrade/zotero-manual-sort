@@ -29,4 +29,11 @@ describe("Zotero package metadata", () => {
       'typeof Cu.unload === "function"',
     );
   });
+
+  it("does not delay item-tree registration on Zotero's global UI-ready gate", () => {
+    const hooks = readFileSync("src/hooks.ts", "utf8");
+    expect(hooks).not.toContain("await Promise.all");
+    expect(hooks).not.toContain("Zotero.unlockPromise");
+    expect(hooks).toContain("addon.controller.start()");
+  });
 });

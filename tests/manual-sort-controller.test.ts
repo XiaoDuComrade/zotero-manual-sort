@@ -65,7 +65,13 @@ function makeFixture() {
     DragDrop: { currentDragSource: {}, currentOrientation: 0 },
     debug: vi.fn(),
   };
-  const controller = new ManualSortController({ zotero, store });
+  const collectionTreeSorter = {
+    start: vi.fn(),
+    stop: vi.fn(),
+    registerWindow: vi.fn(),
+    unregisterWindow: vi.fn(),
+  };
+  const controller = new ManualSortController({ zotero, store, collectionTreeSorter });
   return { controller, tree, win, store, original, headerCell, search: document.querySelector("input")! };
 }
 
