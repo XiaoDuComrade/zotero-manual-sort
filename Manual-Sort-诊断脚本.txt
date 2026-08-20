@@ -1,0 +1,165 @@
+Manual Sort for Zotero 诊断脚本
+================================
+
+适用环境：Windows / Zotero 9.0.6
+
+运行方法：
+
+1. 在 Zotero 中打开“工具 → 开发者 → Run JavaScript”。
+2. 不要勾选“作为异步函数运行”。
+3. 复制下方“脚本开始”和“脚本结束”之间的全部内容。
+4. 粘贴后点击“运行”。
+5. 将运行结果完整复制并发送给插件开发者。
+
+注意：运行前请打开一个普通、可编辑的分类，并清空右上角快速搜索框。
+
+-------------------- 脚本开始 --------------------
+
+(() => {
+  const win =
+    Zotero.getMainWindow?.() ||
+    Zotero.getMainWindows?.()[0];
+
+  if (!win) {
+    return {
+      error: "找不到 Zotero 主窗口",
+    };
+  }
+
+  const itemTree = win.ZoteroPane?.itemsView;
+  const collectionTree = win.ZoteroPane?.collectionsView;
+  const source = itemTree?.collectionTreeRow;
+  const search = win.document?.getElementById?.("zotero-tb-search");
+
+  const functionText = fn => {
+    try {
+      return Function.prototype.toString.call(fn);
+    } catch (error) {
+      return "";
+    }
+  };
+
+  let collectionFilterEmpty = null;
+  try {
+    collectionFilterEmpty =
+      typeof collectionTree?._isFilterEmpty === "function"
+        ? collectionTree._isFilterEmpty()
+        : null;
+  } catch (error) {
+    collectionFilterEmpty = `ERROR: ${error}`;
+  }
+
+  const quickSearch = String(
+    search?.value ?? search?.searchTextbox?.value ?? ""
+  ).trim();
+
+  const itemDragOverText = functionText(itemTree?.onDragOver);
+  const collectionDragOverText = functionText(collectionTree?.onDragOver);
+
+  const itemBlockers = [];
+  if (!source?.isCollection?.()) {
+    itemBlockers.push("当前不是普通分类");
+  }
+  if (source?.editable === false) {
+    itemBlockers.push("当前分类不可编辑");
+  }
+  if (Zotero.Prefs.get("recursiveCollections")) {
+    itemBlockers.push("已启用显示子分类中的条目");
+  }
+  if (quickSearch) {
+    itemBlockers.push(`快速搜索未清空: ${quickSearch}`);
+  }
+
+  const manualSort = Zotero.ManualSort;
+  const controller = manualSort?.controller;
+  const itemPatch = controller?.patches?.get?.(win);
+  const collectionSorter = controller?.collectionTreeSorter;
+  const collectionPatch = collectionSorter?.patches?.get?.(win);
+
+  if (!manualSort) {
+    itemBlockers.push("未找到 Zotero.ManualSort 全局实例");
+  } else if (!itemPatch) {
+    itemBlockers.push("Manual Sort 未注册条目树补丁");
+  }
+
+  const collectionBlockers = [];
+  if (collectionFilterEmpty === false) {
+    collectionBlockers.push("左侧分类树存在筛选条件");
+  }
+  if (!manualSort) {
+    collectionBlockers.push("未找到 Zotero.ManualSort 全局实例");
+  } else if (!collectionPatch) {
+    collectionBlockers.push("Manual Sort 未注册分类树补丁");
+  }
+
+  return {
+    zoteroVersion: Zotero.version,
+
+    manualSort: {
+      exists: !!manualSort,
+      alive: manualSort?.alive ?? null,
+      controllerStarted: controller?.started ?? null,
+      itemPatchRegistered: !!itemPatch,
+      collectionPatchRegistered: !!collectionPatch,
+      expectedPluginVersion: "0.2.1",
+    },
+
+    itemContext: {
+      regularCollection: !!source?.isCollection?.(),
+      editable: source?.editable ?? null,
+      collectionID: source?.ref?.id ?? null,
+      recursiveCollections:
+        !!Zotero.Prefs.get("recursiveCollections"),
+      quickSearch,
+      blockers: itemBlockers,
+    },
+
+    collectionContext: {
+      filterEmpty: collectionFilterEmpty,
+      selectedRowID: collectionTree?.selectedTreeRow?.id ?? null,
+      selectedIsCollection:
+        !!collectionTree?.selectedTreeRow?.isCollection?.(),
+      selectedEditable:
+        collectionTree?.selectedTreeRow?.editable ?? null,
+      blockers: collectionBlockers,
+    },
+
+    dragHandlers: {
+      itemManualHandler:
+        itemDragOverText.includes("isManualDrag"),
+      collectionManualHandler:
+        collectionDragOverText.includes("manualDropTarget"),
+      itemOnDragOverPreview:
+        itemDragOverText.replace(/\s+/g, " ").slice(0, 220),
+      collectionOnDragOverPreview:
+        collectionDragOverText.replace(/\s+/g, " ").slice(0, 220),
+    },
+
+    easierCitation: {
+      exists:
+        typeof Zotero.ZoteroCitation !== "undefined",
+      alive: Zotero.ZoteroCitation?.alive ?? null,
+      apiType: typeof Zotero.ZoteroCitation?.api,
+    },
+
+    zoteroDragDrop: {
+      currentDragSourceType:
+        typeof Zotero.DragDrop?.currentDragSource,
+      currentOrientation:
+        Zotero.DragDrop?.currentOrientation ?? null,
+    },
+  };
+})()
+
+-------------------- 脚本结束 --------------------
+
+结果判断提示：
+
+- recursiveCollections 为 true：需要关闭“显示子分类中的条目”。
+- quickSearch 不是空字符串：需要清空快速搜索框。
+- itemPatchRegistered 为 false：条目树补丁没有成功安装。
+- collectionPatchRegistered 为 false：分类树补丁没有成功安装。
+- PatchRegistered 为 true，但对应 ManualHandler 为 false：拖放函数很可能被其他插件覆盖。
+- easierCitation.exists 为 false：Easier Citation 没有正常完成初始化，符合此前
+  “Zotero.ZoteroCitation is undefined”的报错特征。
+
