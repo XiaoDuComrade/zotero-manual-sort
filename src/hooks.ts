@@ -1,11 +1,11 @@
 declare const addon: import("./addon").Addon;
 
 async function onStartup(): Promise<void> {
-  await Promise.all([
-    Zotero.initializationPromise,
-    Zotero.unlockPromise,
-    Zotero.uiReadyPromise,
-  ]);
+  // bootstrap.js has already awaited initializationPromise. Do not wait for
+  // uiReadyPromise here: with many installed plugins it can resolve long after
+  // the main window and item tree are usable. registerWindow() already retries
+  // briefly when the tree has not mounted yet, and onMainWindowLoad covers
+  // windows created after startup.
   addon.controller.start();
 }
 

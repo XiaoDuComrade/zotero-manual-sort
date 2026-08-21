@@ -12,17 +12,27 @@ export function reorderByDrop(
   placement: DropPlacement,
 ): number[] {
   const current = uniqueIntegers(currentOrder);
+  return reorderValuesByDrop(current, uniqueIntegers(draggedIDs), targetID, placement);
+}
+
+export function reorderValuesByDrop<T extends string | number>(
+  currentOrder: readonly T[],
+  draggedValues: readonly T[],
+  targetValue: T | null,
+  placement: DropPlacement,
+): T[] {
+  const current = [...new Set(currentOrder)];
   const currentSet = new Set(current);
-  const dragged = uniqueIntegers(draggedIDs).filter((id) => currentSet.has(id));
+  const dragged = [...new Set(draggedValues)].filter((value) => currentSet.has(value));
   if (!dragged.length) return current;
 
   const draggedSet = new Set(dragged);
-  if (targetID !== null && draggedSet.has(targetID)) return current;
+  if (targetValue !== null && draggedSet.has(targetValue)) return current;
 
-  const remaining = current.filter((id) => !draggedSet.has(id));
+  const remaining = current.filter((value) => !draggedSet.has(value));
   let insertionIndex = remaining.length;
-  if (targetID !== null && placement !== "end") {
-    const targetIndex = remaining.indexOf(targetID);
+  if (targetValue !== null && placement !== "end") {
+    const targetIndex = remaining.indexOf(targetValue);
     if (targetIndex >= 0) {
       insertionIndex = targetIndex + (placement === "after" ? 1 : 0);
     }

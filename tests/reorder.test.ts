@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { orderTreeRowGroups, reorderByDrop, topLevelItemIDs } from "../src/core/reorder";
+import { orderTreeRowGroups, reorderByDrop, reorderValuesByDrop, topLevelItemIDs } from "../src/core/reorder";
 
 describe("reorderByDrop", () => {
   it("moves one item before another", () => {
@@ -16,6 +16,16 @@ describe("reorderByDrop", () => {
 
   it("does nothing when dropping on a dragged item", () => {
     expect(reorderByDrop([1, 2, 3], [2], 2, "after")).toEqual([1, 2, 3]);
+  });
+});
+
+describe("reorderValuesByDrop", () => {
+  it("reorders collection keys", () => {
+    expect(reorderValuesByDrop(["A", "B", "C"], ["A"], "C", "after")).toEqual([
+      "B",
+      "C",
+      "A",
+    ]);
   });
 });
 

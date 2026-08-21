@@ -1,13 +1,13 @@
 {
   "name": "zotero-manual-sort",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
-  "description": "Drag Zotero 9 collection items into a persistent manual order",
+  "description": "Manually order Zotero 9 collections and the items inside them",
   "author": "Local Zotero Plugin",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/local/zotero-manual-sort.git"
+    "url": "git+https://github.com/XiaoDuComrade/zotero-manual-sort.git"
   },
   "config": {
     "addonName": "Manual Sort for Zotero",
